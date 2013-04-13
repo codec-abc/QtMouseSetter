@@ -14,9 +14,13 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
+
+public slots:
+    void displayMouseInformationPopup();
     
 private slots:
     void on_MouseInfoButton_clicked();
+    void on_pushButton_4_clicked();
 
 private:
     Ui::MainWindow *ui;

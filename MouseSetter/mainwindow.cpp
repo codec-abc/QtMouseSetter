@@ -9,6 +9,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+
 }
 
 MainWindow::~MainWindow()
@@ -16,16 +17,17 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-//        SystemParametersInfo(SPI_SETMOUSE,0,aMouseInfo,SPIF_SENDCHANGE);
-
 void MainWindow::on_MouseInfoButton_clicked()
 {
-    BOOL fResult1;
-    BOOL fResult2;
+
+}
+
+void MainWindow::displayMouseInformationPopup()
+{
     int aMouseInfo[3];
     int bMouseInfo = -1;
-    fResult1 = SystemParametersInfo(SPI_GETMOUSE, 0,&aMouseInfo,0);
-    fResult2 = SystemParametersInfo(SPI_GETMOUSESPEED,0,&bMouseInfo,0);
+    SystemParametersInfo(SPI_GETMOUSE, 0,&aMouseInfo,0);
+    SystemParametersInfo(SPI_GETMOUSESPEED,0,&bMouseInfo,0);
     std::cout << "push button clicked" << std::endl;
     QDialog* dialogMouseInformation = new QDialog(0,0);
     Ui::Dialog dialogMouseInformationUi;
@@ -42,7 +44,30 @@ void MainWindow::on_MouseInfoButton_clicked()
     dialogMouseInformationUi.mouse_acceleration_label->setText(string3);
     dialogMouseInformationUi.mouse_speed_label->setText(string4);
 
-   // dialogMouseInformation->layout()->setSizeConstraint( QLayout::SetFixedSize );
     dialogMouseInformation->show();
+}
 
+void MainWindow::on_pushButton_4_clicked()
+{
+    int aMouseInfo[3];
+    int bMouseInfo=ui->horizontalSlider->value();
+    if(!bMouseInfo != 1)
+    {
+        bMouseInfo = (bMouseInfo -1)*2;
+    }
+    if(!ui->checkBox->isChecked())
+    {
+        aMouseInfo[0]=0;
+        aMouseInfo[1]=0;
+        aMouseInfo[2]=0;
+    }
+    else
+    {
+        aMouseInfo[0]=6;
+        aMouseInfo[1]=10;
+        aMouseInfo[2]=1;
+    }
+    SystemParametersInfo(SPI_SETMOUSE,0,aMouseInfo,SPIF_SENDWININICHANGE);
+    SystemParametersInfo(SPI_SETMOUSESPEED, 0, (int*) bMouseInfo, SPIF_SENDWININICHANGE);
+    std::cout << "mouse speed set to " << bMouseInfo << std::endl;
 }
