@@ -18,4 +18,8 @@ SOURCES += main.cpp\
 HEADERS  += mainwindow.h
 
 FORMS    += mainwindow.ui \
-    dialogMouseInformation.ui
+    dialogMouseInformation.ui \
+    dialogOption.ui
+
+RESOURCES += \
+    Resource.qrc

@@ -3,13 +3,29 @@
 #include "windows.h"
 #include <iostream>
 #include "ui_dialogMouseInformation.h"
+#include <QMenu>
+#include <QCloseEvent>
+#include <QSettings>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::MainWindow)
+    ui(new Ui::MainWindow) ,
+    settings("codec-abc", "MouseSetter")
 {
     ui->setupUi(this);
-
+    trayIconMenu = new QMenu(this);
+    subMenuTrayIcon = new QMenu(this);
+    subMenuTrayIcon->setTitle("Switch to profile");
+    subMenuTrayIcon->setEnabled(false);
+    createActions();
+    createTrayIcon();
+    setIcon();
+    trayIcon->show();
+    bool value = settings.value("showMainWindowAtStartup",true).toBool();
+    if(value)
+    {
+        this->show();
+    }
 }
 
 MainWindow::~MainWindow()
@@ -28,7 +44,6 @@ void MainWindow::displayMouseInformationPopup()
     int bMouseInfo = -1;
     SystemParametersInfo(SPI_GETMOUSE, 0,&aMouseInfo,0);
     SystemParametersInfo(SPI_GETMOUSESPEED,0,&bMouseInfo,0);
-    std::cout << "push button clicked" << std::endl;
     QDialog* dialogMouseInformation = new QDialog(0,0);
     Ui::Dialog dialogMouseInformationUi;
 
@@ -69,5 +84,59 @@ void MainWindow::on_pushButton_4_clicked()
     }
     SystemParametersInfo(SPI_SETMOUSE,0,aMouseInfo,SPIF_SENDWININICHANGE);
     SystemParametersInfo(SPI_SETMOUSESPEED, 0, (int*) bMouseInfo, SPIF_SENDWININICHANGE);
-    std::cout << "mouse speed set to " << bMouseInfo << std::endl;
+}
+
+void MainWindow::setIcon()
+{
+    trayIcon->setIcon(QIcon(":/Resource/input-mouse.png"));
+}
+
+void MainWindow::createTrayIcon()
+{
+
+
+    trayIconMenu->addAction(open);
+    trayIconMenu->addSeparator();
+    trayIconMenu->addAction(close);
+    trayIconMenu->addMenu(this->subMenuTrayIcon);
+
+    trayIcon = new QSystemTrayIcon(this);
+    trayIcon->setContextMenu(trayIconMenu);
+
+
+    connect(
+            trayIcon,
+            SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
+            this,
+            SLOT(trayIconClicked(QSystemTrayIcon::ActivationReason))
+           );
+}
+
+void MainWindow::trayIconClicked(QSystemTrayIcon::ActivationReason reason)
+{
+    if(reason == QSystemTrayIcon::Trigger)
+        this->show();
+}
+
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+    if (trayIcon->isVisible())
+    {
+        trayIcon->showMessage(tr("Mouse Profile Switcher"),
+        tr("This application is still running. Click this to hide the message for the next time"));
+        hide();
+
+
+        event->ignore(); // Don't let the event propagate to the base class
+    }
+}
+
+void MainWindow::createActions()
+{
+    open = new QAction(tr("&Open"), this);
+    connect(open, SIGNAL(triggered()), this, SLOT(show()));
+
+
+    close = new QAction(tr("&Quit"), this);
+    connect(close, SIGNAL(triggered()), qApp, SLOT(quit()));
 }

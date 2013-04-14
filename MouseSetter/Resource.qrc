@@ -1,0 +1,13 @@
+<RCC>
+    <qresource prefix="/">
+        <file>Resource/edit-6.png</file>
+        <file>Resource/edit-add-4.png</file>
+        <file>Resource/edit-remove-3.png</file>
+        <file>Resource/input-mouse.png</file>
+        <file>Resource/input-mouse-2.png</file>
+        <file>Resource/input-mouse-3.png</file>
+        <file>Resource/input-mouse-4.png</file>
+        <file>Resource/input-mouse-5.png</file>
+        <file>Resource/input-mouse-6.png</file>
+    </qresource>
+</RCC>
