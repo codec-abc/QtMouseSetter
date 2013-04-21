@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>332</width>
+    <width>359</width>
     <height>111</height>
    </rect>
   </property>
@@ -15,6 +15,9 @@
     <horstretch>0</horstretch>
     <verstretch>0</verstretch>
    </sizepolicy>
+  </property>
+  <property name="contextMenuPolicy">
+   <enum>Qt::DefaultContextMenu</enum>
   </property>
   <property name="windowTitle">
    <string>Mouse Profiles Switcher</string>
@@ -210,7 +213,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>332</width>
+     <width>359</width>
      <height>21</height>
     </rect>
    </property>

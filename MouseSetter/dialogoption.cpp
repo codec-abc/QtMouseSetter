@@ -11,6 +11,7 @@ DialogOption::DialogOption(QWidget *parent) :
 {
     ui->setupUi(this);
     init();
+    this->setFixedSize(this->geometry().width(),this->geometry().height());
 }
 
 DialogOption::~DialogOption()

@@ -35,6 +35,7 @@ MainWindow::MainWindow(QWidget *parent) :
         this->show();
     }
     this->updateProfiles();
+    this->setFixedSize(this->geometry().width(),this->geometry().height());
 
 
 
@@ -73,31 +74,8 @@ void MainWindow::displayMouseInformationPopup()
     dialogMouseInformationUi.mouse_speed_label->setText(string4);
 
     dialogMouseInformation->show();
-}
 
-//void MainWindow::on_pushButton_4_clicked()
-//{
-//    int aMouseInfo[3];
-//    int bMouseInfo=ui->horizontalSlider->value();
-//    if(!bMouseInfo != 1)
-//    {
-//        bMouseInfo = (bMouseInfo -1)*2;
-//    }
-//    if(!ui->checkBox->isChecked())
-//    {
-//        aMouseInfo[0]=0;
-//        aMouseInfo[1]=0;
-//        aMouseInfo[2]=0;
-//    }
-//    else
-//    {
-//        aMouseInfo[0]=6;
-//        aMouseInfo[1]=10;
-//        aMouseInfo[2]=1;
-//    }
-//    SystemParametersInfo(SPI_SETMOUSE,0,aMouseInfo,SPIF_SENDWININICHANGE);
-//    SystemParametersInfo(SPI_SETMOUSESPEED, 0, (int*) bMouseInfo, SPIF_SENDWININICHANGE);
-//}
+}
 
 void MainWindow::setIcon()
 {
@@ -109,7 +87,6 @@ void MainWindow::createTrayIcon()
     trayIconMenu->addAction(open);
     trayIconMenu->addMenu(this->subMenuTrayIcon);
     trayIconMenu->addAction(close);
-
 
     trayIcon = new QSystemTrayIcon(this);
     trayIcon->setContextMenu(trayIconMenu);
@@ -125,7 +102,6 @@ void MainWindow::createTrayIcon()
             SIGNAL(mapped(int)),
             this,
             SLOT(applyProfileFromIndex(int)));
-
 }
 
 void MainWindow::trayIconClicked(QSystemTrayIcon::ActivationReason reason)
@@ -147,7 +123,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
             tr("This application is still running. Click this to hide the message for the next time"));
         }
         hide();
-        event->ignore(); // Don't let the event propagate to the base class
+        event->ignore();
     }
 }
 
@@ -193,7 +169,7 @@ void MainWindow::exitApp()
 
 void MainWindow::updateProfiles()
 {
-    int numberOfProfiles = settings->value("nbProfiles",0).toInt();
+    QStringList groups = settings->childGroups();
     this->ui->comboBox->clear();
     this->subMenuTrayIcon->clear();
     for (int i = 0; i < mouseProfileAndAction.size(); i++)
@@ -202,16 +178,17 @@ void MainWindow::updateProfiles()
         delete qaction;
     }
     this->mouseProfileAndAction.clear();
-    for (int i = 0; i < numberOfProfiles; i++)
+    for (int i = 0; i < groups.size(); i++)
     {
-        QString currentProfileNamedIndex(QString((MainWindow::profilePrefix)).append(QString::number(i+1)));
+        QString currentProfileNamedIndex(groups[i]);
         int a0          = settings->value(QString(currentProfileNamedIndex).append("/a0"),0).toInt();
         int a1          = settings->value(QString(currentProfileNamedIndex).append("/a1"),0).toInt();
         int a2          = settings->value(QString(currentProfileNamedIndex).append("/a2"),0).toInt();
         int a3          = settings->value(QString(currentProfileNamedIndex).append("/a3"),0).toInt();
         QString name    = settings->value(QString(currentProfileNamedIndex).append("/name"),"").toString();
+        QString folder  = settings->value(QString(currentProfileNamedIndex).append("/folder"),"").toString();
         MouseProfile currentMouseProfile(a0,a1,a2,a3,name);
-        std::cout << "creating action " << name.toStdString() << std::endl;
+        currentMouseProfile.folder = folder;
         QAction* currentAction = new QAction(name,this);
         connect(currentAction, SIGNAL(triggered()), signalMapper, SLOT(map()));
         signalMapper->setMapping(currentAction,i);
@@ -221,10 +198,11 @@ void MainWindow::updateProfiles()
         currentPair.second = currentAction;
         this->mouseProfileAndAction.push_back(currentPair);
         this->ui->comboBox->addAction(currentAction);
+        this->ui->comboBox->addItem(name,i);
         this->subMenuTrayIcon->addAction(currentAction);
 
     }
-    if(numberOfProfiles > 0)
+    if(groups.size() > 0)
     {
         this->setButtonsState(true);
     }
@@ -243,18 +221,22 @@ void MainWindow::on_pushButtonAddProfile_clicked()
     Dialog.exec();
 }
 
-void MainWindow::addProfile(MouseProfile mouseProfileIn)
+bool MainWindow::addProfile(MouseProfile mouseProfileIn)
 {
-    int numberOfProfiles = settings->value("nbProfiles",0).toInt();
-    ++numberOfProfiles;
-    settings->setValue("nbProfiles",numberOfProfiles);
-    QString currentProfileNamedIndex(QString((MainWindow::profilePrefix)).append(QString::number(numberOfProfiles)));
+    QString currentProfileNamedIndex(QString((MainWindow::profilePrefix)).append(mouseProfileIn.name));
+    QStringList groups = settings->childGroups();
+    if(groups.contains(currentProfileNamedIndex))
+    {
+        return false;
+    }
     settings->setValue(QString(currentProfileNamedIndex).append("/a0"),mouseProfileIn.a0);
     settings->setValue(QString(currentProfileNamedIndex).append("/a1"),mouseProfileIn.a1);
     settings->setValue(QString(currentProfileNamedIndex).append("/a2"),mouseProfileIn.a2);
     settings->setValue(QString(currentProfileNamedIndex).append("/a3"),mouseProfileIn.a3);
     settings->setValue(QString(currentProfileNamedIndex).append("/name"),mouseProfileIn.name);
+    settings->setValue(QString(currentProfileNamedIndex).append("/folder"),currentProfileNamedIndex);
     this->updateProfiles();
+    return true;
 }
 
 
@@ -269,7 +251,6 @@ void MainWindow::setButtonsState(bool state)
 
 void MainWindow::applyProfileFromIndex(int i)
 {
-    std::cout << "i is " << i << std::endl;
     MouseProfile mouseProfileToApply = this->mouseProfileAndAction[i].first;
     int aMouseInfo[3];
     aMouseInfo[0] = mouseProfileToApply.a0;
@@ -278,4 +259,19 @@ void MainWindow::applyProfileFromIndex(int i)
     int bMouseInfo=mouseProfileToApply.a3;
     SystemParametersInfo(SPI_SETMOUSE,0,aMouseInfo,SPIF_SENDWININICHANGE);
     SystemParametersInfo(SPI_SETMOUSESPEED, 0, (int*) bMouseInfo, SPIF_SENDWININICHANGE);
+}
+
+void MainWindow::on_pushButtonApplyProfile_clicked()
+{
+    int profileIndex = this->ui->comboBox->itemData(this->ui->comboBox->currentIndex()).toInt();
+    applyProfileFromIndex(profileIndex);
+    this->updateProfiles();
+}
+
+void MainWindow::on_pushButtonDeleteProfile_clicked()
+{
+    int profileIndex = this->ui->comboBox->itemData(this->ui->comboBox->currentIndex()).toInt();
+    MouseProfile mouseProfileToApply = this->mouseProfileAndAction[profileIndex].first;
+    settings->remove(mouseProfileToApply.folder);
+    this->updateProfiles();
 }

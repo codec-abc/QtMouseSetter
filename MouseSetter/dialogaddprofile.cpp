@@ -10,6 +10,7 @@ DialogAddProfile::DialogAddProfile(QWidget *parent) :
     ui(new Ui::DialogAddProfile)
 {
     ui->setupUi(this);
+    this->setFixedSize(this->geometry().width(),this->geometry().height());
 }
 
 DialogAddProfile::~DialogAddProfile()
@@ -61,8 +62,18 @@ void DialogAddProfile::accept()
     {
         MouseProfile profile(a0,a1,a2,a3,name);
         MainWindow* mainWindow = (MainWindow*) this->parent();
-        mainWindow->addProfile(profile);
-        QDialog::accept();
+        bool profileSuccefullyAdded = mainWindow->addProfile(profile);
+        if(profileSuccefullyAdded)
+        {
+            QDialog::accept();
+        }
+        else
+        {
+            QMessageBox msgBox;
+            msgBox.setIcon(QMessageBox::Critical);
+            msgBox.setText("this name already exist, please choose another one");
+            msgBox.exec();
+        }
     }
     else
     {

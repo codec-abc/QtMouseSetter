@@ -21,7 +21,7 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
     QSettings* getSetting();
-    void addProfile(MouseProfile);
+    bool addProfile(MouseProfile);
     static QString const profilePrefix;
 
 public slots:
@@ -40,6 +40,10 @@ private slots:
 
     void on_pushButtonAddProfile_clicked();
     void setButtonsState(bool state);
+
+    void on_pushButtonApplyProfile_clicked();
+
+    void on_pushButtonDeleteProfile_clicked();
 
 private:
     void createActions();

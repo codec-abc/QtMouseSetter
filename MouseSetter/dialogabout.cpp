@@ -6,6 +6,7 @@ DialogAbout::DialogAbout(QWidget *parent) :
     ui(new Ui::DialogAbout)
 {
     ui->setupUi(this);
+    this->setFixedSize(this->geometry().width(),this->geometry().height());
 }
 
 DialogAbout::~DialogAbout()

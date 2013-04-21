@@ -15,6 +15,7 @@ public:
     int a2;
     int a3;
     QString name;
+    QString folder;
 };
 
 #endif // MOUSEPROFILE_H
