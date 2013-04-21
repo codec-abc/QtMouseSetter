@@ -6,11 +6,14 @@
 #include <QMenu>
 #include <QCloseEvent>
 #include <QSettings>
+#include "dialogabout.h"
+#include "dialogoption.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow) ,
-    settings("codec-abc", "MouseSetter")
+    settings(new QSettings("codec-abc", "MouseSetter")),
+    lastClose(false)
 {
     ui->setupUi(this);
     trayIconMenu = new QMenu(this);
@@ -21,7 +24,7 @@ MainWindow::MainWindow(QWidget *parent) :
     createTrayIcon();
     setIcon();
     trayIcon->show();
-    bool value = settings.value("showMainWindowAtStartup",true).toBool();
+    bool value = settings->value("showMainWindowAtStartup",true).toBool();
     if(value)
     {
         this->show();
@@ -31,6 +34,7 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
     delete ui;
+    delete settings;
 }
 
 void MainWindow::on_MouseInfoButton_clicked()
@@ -62,29 +66,29 @@ void MainWindow::displayMouseInformationPopup()
     dialogMouseInformation->show();
 }
 
-void MainWindow::on_pushButton_4_clicked()
-{
-    int aMouseInfo[3];
-    int bMouseInfo=ui->horizontalSlider->value();
-    if(!bMouseInfo != 1)
-    {
-        bMouseInfo = (bMouseInfo -1)*2;
-    }
-    if(!ui->checkBox->isChecked())
-    {
-        aMouseInfo[0]=0;
-        aMouseInfo[1]=0;
-        aMouseInfo[2]=0;
-    }
-    else
-    {
-        aMouseInfo[0]=6;
-        aMouseInfo[1]=10;
-        aMouseInfo[2]=1;
-    }
-    SystemParametersInfo(SPI_SETMOUSE,0,aMouseInfo,SPIF_SENDWININICHANGE);
-    SystemParametersInfo(SPI_SETMOUSESPEED, 0, (int*) bMouseInfo, SPIF_SENDWININICHANGE);
-}
+//void MainWindow::on_pushButton_4_clicked()
+//{
+//    int aMouseInfo[3];
+//    int bMouseInfo=ui->horizontalSlider->value();
+//    if(!bMouseInfo != 1)
+//    {
+//        bMouseInfo = (bMouseInfo -1)*2;
+//    }
+//    if(!ui->checkBox->isChecked())
+//    {
+//        aMouseInfo[0]=0;
+//        aMouseInfo[1]=0;
+//        aMouseInfo[2]=0;
+//    }
+//    else
+//    {
+//        aMouseInfo[0]=6;
+//        aMouseInfo[1]=10;
+//        aMouseInfo[2]=1;
+//    }
+//    SystemParametersInfo(SPI_SETMOUSE,0,aMouseInfo,SPIF_SENDWININICHANGE);
+//    SystemParametersInfo(SPI_SETMOUSESPEED, 0, (int*) bMouseInfo, SPIF_SENDWININICHANGE);
+//}
 
 void MainWindow::setIcon()
 {
@@ -93,8 +97,6 @@ void MainWindow::setIcon()
 
 void MainWindow::createTrayIcon()
 {
-
-
     trayIconMenu->addAction(open);
     trayIconMenu->addSeparator();
     trayIconMenu->addAction(close);
@@ -103,30 +105,35 @@ void MainWindow::createTrayIcon()
     trayIcon = new QSystemTrayIcon(this);
     trayIcon->setContextMenu(trayIconMenu);
 
-
     connect(
             trayIcon,
             SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
             this,
             SLOT(trayIconClicked(QSystemTrayIcon::ActivationReason))
            );
+    connect(trayIcon, SIGNAL(messageClicked()), this, SLOT(messageClicked()));
+
 }
 
 void MainWindow::trayIconClicked(QSystemTrayIcon::ActivationReason reason)
 {
     if(reason == QSystemTrayIcon::Trigger)
+    {
         this->show();
+    }
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
     if (trayIcon->isVisible())
     {
-        trayIcon->showMessage(tr("Mouse Profile Switcher"),
-        tr("This application is still running. Click this to hide the message for the next time"));
+        bool value = settings->value("showTrayIconMessage",true).toBool();
+        if(value && !lastClose)
+        {
+            trayIcon->showMessage(tr("Mouse Profile Switcher"),
+            tr("This application is still running. Click this to hide the message for the next time"));
+        }
         hide();
-
-
         event->ignore(); // Don't let the event propagate to the base class
     }
 }
@@ -136,7 +143,37 @@ void MainWindow::createActions()
     open = new QAction(tr("&Open"), this);
     connect(open, SIGNAL(triggered()), this, SLOT(show()));
 
-
     close = new QAction(tr("&Quit"), this);
-    connect(close, SIGNAL(triggered()), qApp, SLOT(quit()));
+    connect(close, SIGNAL(triggered()), this, SLOT(exitApp()));
+}
+
+
+void MainWindow::on_actionAbout_triggered()
+{
+    DialogAbout Dialog(this);
+    Dialog.setModal(true);
+    Dialog.exec();
+}
+
+void MainWindow::on_actionPreferences_triggered()
+{
+    DialogOption Dialog(this);
+    Dialog.setModal(true);
+    Dialog.exec();
+}
+
+QSettings* MainWindow::getSetting()
+{
+    return this->settings;
+}
+
+void MainWindow::messageClicked()
+{
+    settings->setValue("showTrayIconMessage",false);
+}
+
+void MainWindow::exitApp()
+{
+    lastClose=true;
+    qApp->quit();
 }

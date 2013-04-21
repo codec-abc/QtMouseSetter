@@ -13,13 +13,19 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp\
-        mainwindow.cpp
+        mainwindow.cpp \
+    dialogabout.cpp \
+    dialogoption.cpp
 
-HEADERS  += mainwindow.h
+HEADERS  += mainwindow.h \
+    dialogabout.h \
+    dialogoption.h
 
 FORMS    += mainwindow.ui \
     dialogMouseInformation.ui \
-    dialogOption.ui
+    dialogabout.ui \
+    dialogoption.ui \
+    ../dialog.ui
 
 RESOURCES += \
     Resource.qrc

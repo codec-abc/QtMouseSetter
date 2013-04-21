@@ -16,14 +16,19 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
+    QSettings* getSetting();
 
 public slots:
     void displayMouseInformationPopup();
     
 private slots:
     void on_MouseInfoButton_clicked();
-    void on_pushButton_4_clicked();
+  //  void on_pushButton_4_clicked();
     void trayIconClicked(QSystemTrayIcon::ActivationReason);
+    void on_actionAbout_triggered();
+    void on_actionPreferences_triggered();
+    void messageClicked();
+    void exitApp();
 
 private:
     void createActions();
@@ -38,10 +43,12 @@ private:
     QAction *open;
     QAction *close;
 
-    QSettings settings;
+    QSettings* settings;
 
     Ui::MainWindow *ui;
     QString string1;
+
+    bool lastClose;
 
 };
 
