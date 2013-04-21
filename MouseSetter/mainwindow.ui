@@ -44,24 +44,34 @@
          </property>
         </spacer>
        </item>
-       <item row="1" column="0">
-        <widget class="QLabel" name="label_2">
+       <item row="1" column="4">
+        <widget class="QPushButton" name="pushButtonDeleteProfile">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="sizePolicy">
-          <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
          </property>
          <property name="text">
-          <string>Profile:</string>
+          <string/>
          </property>
-         <property name="alignment">
-          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         <property name="icon">
+          <iconset resource="Resource.qrc">
+           <normaloff>:/Resource/edit-remove-3.png</normaloff>:/Resource/edit-remove-3.png</iconset>
+         </property>
+         <property name="iconSize">
+          <size>
+           <width>24</width>
+           <height>24</height>
+          </size>
          </property>
         </widget>
        </item>
        <item row="1" column="3">
-        <widget class="QPushButton" name="pushButton">
+        <widget class="QPushButton" name="pushButtonAddProfile">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
            <horstretch>0</horstretch>
@@ -83,8 +93,27 @@
          </property>
         </widget>
        </item>
-       <item row="1" column="4">
-        <widget class="QPushButton" name="pushButton_2">
+       <item row="1" column="0">
+        <widget class="QLabel" name="label_2">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="text">
+          <string>Profile:</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="5">
+        <widget class="QPushButton" name="pushButtonEditProfile">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="sizePolicy">
           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
            <horstretch>0</horstretch>
@@ -96,7 +125,7 @@
          </property>
          <property name="icon">
           <iconset resource="Resource.qrc">
-           <normaloff>:/Resource/edit-remove-3.png</normaloff>:/Resource/edit-remove-3.png</iconset>
+           <normaloff>:/Resource/edit-6.png</normaloff>:/Resource/edit-6.png</iconset>
          </property>
          <property name="iconSize">
           <size>
@@ -119,20 +148,17 @@
          </property>
         </widget>
        </item>
-       <item row="1" column="5">
-        <widget class="QPushButton" name="pushButton_3">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
+       <item row="1" column="6">
+        <widget class="QPushButton" name="pushButtonApplyProfile">
+         <property name="enabled">
+          <bool>false</bool>
          </property>
          <property name="text">
           <string/>
          </property>
          <property name="icon">
           <iconset resource="Resource.qrc">
-           <normaloff>:/Resource/edit-6.png</normaloff>:/Resource/edit-6.png</iconset>
+           <normaloff>:/Resource/dialog-ok-apply-6.png</normaloff>:/Resource/dialog-ok-apply-6.png</iconset>
          </property>
          <property name="iconSize">
           <size>

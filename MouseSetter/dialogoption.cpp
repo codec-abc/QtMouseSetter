@@ -23,9 +23,7 @@ void DialogOption::init()
     MainWindow* mainWindow = (MainWindow*) this->parent();
     QSettings* settings = mainWindow->getSetting();
     QString test = QSettings("HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run", QSettings::NativeFormat).value("MouseSetter").toString();
-    std::cout << test.toStdString() << std::endl;
     QString test2 = QCoreApplication::applicationFilePath();
-    std::cout << test2.toStdString() << std::endl;
     bool value = test == test2;
     bool value2 = settings->value("showMainWindowAtStartup",true).toBool();
     bool value3 = settings->value("showTrayIconMessage",true).toBool();

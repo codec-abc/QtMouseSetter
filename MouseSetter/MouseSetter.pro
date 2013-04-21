@@ -15,17 +15,21 @@ TEMPLATE = app
 SOURCES += main.cpp\
         mainwindow.cpp \
     dialogabout.cpp \
-    dialogoption.cpp
+    dialogoption.cpp \
+    dialogaddprofile.cpp \
+    mouseprofile.cpp
 
 HEADERS  += mainwindow.h \
     dialogabout.h \
-    dialogoption.h
+    dialogoption.h \
+    dialogaddprofile.h \
+    mouseprofile.h
 
 FORMS    += mainwindow.ui \
     dialogMouseInformation.ui \
     dialogabout.ui \
     dialogoption.ui \
-    ../dialog.ui
+    dialogaddprofile.ui
 
 RESOURCES += \
     Resource.qrc

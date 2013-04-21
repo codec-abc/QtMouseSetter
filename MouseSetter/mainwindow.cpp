@@ -8,18 +8,23 @@
 #include <QSettings>
 #include "dialogabout.h"
 #include "dialogoption.h"
+#include "dialogaddprofile.h"
+
+const QString MainWindow::profilePrefix("Profile");
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow) ,
     settings(new QSettings("codec-abc", "MouseSetter")),
-    lastClose(false)
+    lastClose(false),
+    signalMapper(new QSignalMapper(this))
+
+
 {
     ui->setupUi(this);
     trayIconMenu = new QMenu(this);
     subMenuTrayIcon = new QMenu(this);
     subMenuTrayIcon->setTitle("Switch to profile");
-    subMenuTrayIcon->setEnabled(false);
     createActions();
     createTrayIcon();
     setIcon();
@@ -29,6 +34,10 @@ MainWindow::MainWindow(QWidget *parent) :
     {
         this->show();
     }
+    this->updateProfiles();
+
+
+
 }
 
 MainWindow::~MainWindow()
@@ -98,9 +107,9 @@ void MainWindow::setIcon()
 void MainWindow::createTrayIcon()
 {
     trayIconMenu->addAction(open);
-    trayIconMenu->addSeparator();
-    trayIconMenu->addAction(close);
     trayIconMenu->addMenu(this->subMenuTrayIcon);
+    trayIconMenu->addAction(close);
+
 
     trayIcon = new QSystemTrayIcon(this);
     trayIcon->setContextMenu(trayIconMenu);
@@ -112,6 +121,10 @@ void MainWindow::createTrayIcon()
             SLOT(trayIconClicked(QSystemTrayIcon::ActivationReason))
            );
     connect(trayIcon, SIGNAL(messageClicked()), this, SLOT(messageClicked()));
+    connect(signalMapper,
+            SIGNAL(mapped(int)),
+            this,
+            SLOT(applyProfileFromIndex(int)));
 
 }
 
@@ -176,4 +189,93 @@ void MainWindow::exitApp()
 {
     lastClose=true;
     qApp->quit();
+}
+
+void MainWindow::updateProfiles()
+{
+    int numberOfProfiles = settings->value("nbProfiles",0).toInt();
+    this->ui->comboBox->clear();
+    this->subMenuTrayIcon->clear();
+    for (int i = 0; i < mouseProfileAndAction.size(); i++)
+    {
+        QAction* qaction = mouseProfileAndAction[i].second;
+        delete qaction;
+    }
+    this->mouseProfileAndAction.clear();
+    for (int i = 0; i < numberOfProfiles; i++)
+    {
+        QString currentProfileNamedIndex(QString((MainWindow::profilePrefix)).append(QString::number(i+1)));
+        int a0          = settings->value(QString(currentProfileNamedIndex).append("/a0"),0).toInt();
+        int a1          = settings->value(QString(currentProfileNamedIndex).append("/a1"),0).toInt();
+        int a2          = settings->value(QString(currentProfileNamedIndex).append("/a2"),0).toInt();
+        int a3          = settings->value(QString(currentProfileNamedIndex).append("/a3"),0).toInt();
+        QString name    = settings->value(QString(currentProfileNamedIndex).append("/name"),"").toString();
+        MouseProfile currentMouseProfile(a0,a1,a2,a3,name);
+        std::cout << "creating action " << name.toStdString() << std::endl;
+        QAction* currentAction = new QAction(name,this);
+        connect(currentAction, SIGNAL(triggered()), signalMapper, SLOT(map()));
+        signalMapper->setMapping(currentAction,i);
+
+        std::pair<MouseProfile, QAction*> currentPair;
+        currentPair.first = currentMouseProfile;
+        currentPair.second = currentAction;
+        this->mouseProfileAndAction.push_back(currentPair);
+        this->ui->comboBox->addAction(currentAction);
+        this->subMenuTrayIcon->addAction(currentAction);
+
+    }
+    if(numberOfProfiles > 0)
+    {
+        this->setButtonsState(true);
+    }
+    else
+    {
+        this->setButtonsState(false);
+    }
+}
+
+
+void MainWindow::on_pushButtonAddProfile_clicked()
+{
+
+    DialogAddProfile Dialog(this);
+    Dialog.setModal(true);
+    Dialog.exec();
+}
+
+void MainWindow::addProfile(MouseProfile mouseProfileIn)
+{
+    int numberOfProfiles = settings->value("nbProfiles",0).toInt();
+    ++numberOfProfiles;
+    settings->setValue("nbProfiles",numberOfProfiles);
+    QString currentProfileNamedIndex(QString((MainWindow::profilePrefix)).append(QString::number(numberOfProfiles)));
+    settings->setValue(QString(currentProfileNamedIndex).append("/a0"),mouseProfileIn.a0);
+    settings->setValue(QString(currentProfileNamedIndex).append("/a1"),mouseProfileIn.a1);
+    settings->setValue(QString(currentProfileNamedIndex).append("/a2"),mouseProfileIn.a2);
+    settings->setValue(QString(currentProfileNamedIndex).append("/a3"),mouseProfileIn.a3);
+    settings->setValue(QString(currentProfileNamedIndex).append("/name"),mouseProfileIn.name);
+    this->updateProfiles();
+}
+
+
+void MainWindow::setButtonsState(bool state)
+{
+    this->ui->pushButtonApplyProfile->setEnabled(state);
+    this->ui->pushButtonDeleteProfile->setEnabled(state);
+    this->ui->pushButtonEditProfile->setEnabled(state);
+    this->ui->comboBox->setEnabled(state);
+    this->subMenuTrayIcon->setEnabled(state);
+}
+
+void MainWindow::applyProfileFromIndex(int i)
+{
+    std::cout << "i is " << i << std::endl;
+    MouseProfile mouseProfileToApply = this->mouseProfileAndAction[i].first;
+    int aMouseInfo[3];
+    aMouseInfo[0] = mouseProfileToApply.a0;
+    aMouseInfo[1] = mouseProfileToApply.a1;
+    aMouseInfo[2] = mouseProfileToApply.a2;
+    int bMouseInfo=mouseProfileToApply.a3;
+    SystemParametersInfo(SPI_SETMOUSE,0,aMouseInfo,SPIF_SENDWININICHANGE);
+    SystemParametersInfo(SPI_SETMOUSESPEED, 0, (int*) bMouseInfo, SPIF_SENDWININICHANGE);
 }
