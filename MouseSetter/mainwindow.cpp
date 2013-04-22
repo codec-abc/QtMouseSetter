@@ -9,6 +9,7 @@
 #include "dialogabout.h"
 #include "dialogoption.h"
 #include "dialogaddprofile.h"
+#include "dialogmouseinformation.h"
 
 const QString MainWindow::profilePrefix("Profile");
 
@@ -17,9 +18,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow) ,
     settings(new QSettings("codec-abc", "MouseSetter")),
     lastClose(false),
-    signalMapper(new QSignalMapper(this))
-
-
+    signalMapper(new QSignalMapper(this)),
+    lastUsedProfile("")
 {
     ui->setupUi(this);
     trayIconMenu = new QMenu(this);
@@ -36,20 +36,18 @@ MainWindow::MainWindow(QWidget *parent) :
     }
     this->updateProfiles();
     this->setFixedSize(this->geometry().width(),this->geometry().height());
-
-
-
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
     delete settings;
-}
-
-void MainWindow::on_MouseInfoButton_clicked()
-{
-
+    delete signalMapper;
+    delete trayIconMenu;
+    delete subMenuTrayIcon;
+    delete trayIcon;
+    delete open;
+    delete close;
 }
 
 void MainWindow::displayMouseInformationPopup()
@@ -58,23 +56,22 @@ void MainWindow::displayMouseInformationPopup()
     int bMouseInfo = -1;
     SystemParametersInfo(SPI_GETMOUSE, 0,&aMouseInfo,0);
     SystemParametersInfo(SPI_GETMOUSESPEED,0,&bMouseInfo,0);
-    QDialog* dialogMouseInformation = new QDialog(0,0);
-    Ui::Dialog dialogMouseInformationUi;
 
     QString string1 = QString::number(aMouseInfo[0]);
     QString string2 = QString::number(aMouseInfo[1]);
     QString string3 = QString::number(aMouseInfo[2]);
     QString string4 = QString::number(bMouseInfo);
 
-    dialogMouseInformationUi.setupUi(dialogMouseInformation);
+    DialogMouseInformation Dialog(this);
+    Dialog.setModal(true);
 
-    dialogMouseInformationUi.mouse_threshold_0_label->setText(string1);
-    dialogMouseInformationUi.mouse_threshold_1_label->setText(string2);
-    dialogMouseInformationUi.mouse_acceleration_label->setText(string3);
-    dialogMouseInformationUi.mouse_speed_label->setText(string4);
+    Ui::DialogMouseInformation* mouseInfoUI = Dialog.getUI();
+    mouseInfoUI->mouse_threshold_0_label->setText(string1);
+    mouseInfoUI->mouse_threshold_1_label->setText(string2);
+    mouseInfoUI->mouse_acceleration_label->setText(string3);
+    mouseInfoUI->mouse_speed_label->setText(string4);
 
-    dialogMouseInformation->show();
-
+    Dialog.exec();
 }
 
 void MainWindow::setIcon()
@@ -169,6 +166,7 @@ void MainWindow::exitApp()
 
 void MainWindow::updateProfiles()
 {
+    int comboBoxIndexToSet = 1;
     QStringList groups = settings->childGroups();
     this->ui->comboBox->clear();
     this->subMenuTrayIcon->clear();
@@ -192,7 +190,10 @@ void MainWindow::updateProfiles()
         QAction* currentAction = new QAction(name,this);
         connect(currentAction, SIGNAL(triggered()), signalMapper, SLOT(map()));
         signalMapper->setMapping(currentAction,i);
-
+        if(name == lastUsedProfile)
+        {
+            comboBoxIndexToSet = i;
+        }
         std::pair<MouseProfile, QAction*> currentPair;
         currentPair.first = currentMouseProfile;
         currentPair.second = currentAction;
@@ -210,12 +211,12 @@ void MainWindow::updateProfiles()
     {
         this->setButtonsState(false);
     }
+    this->ui->comboBox->setCurrentIndex(comboBoxIndexToSet);
 }
 
 
 void MainWindow::on_pushButtonAddProfile_clicked()
 {
-
     DialogAddProfile Dialog(this);
     Dialog.setModal(true);
     Dialog.exec();
@@ -235,6 +236,7 @@ bool MainWindow::addProfile(MouseProfile mouseProfileIn)
     settings->setValue(QString(currentProfileNamedIndex).append("/a3"),mouseProfileIn.a3);
     settings->setValue(QString(currentProfileNamedIndex).append("/name"),mouseProfileIn.name);
     settings->setValue(QString(currentProfileNamedIndex).append("/folder"),currentProfileNamedIndex);
+    this->lastUsedProfile =QString(mouseProfileIn.name);
     this->updateProfiles();
     return true;
 }
@@ -259,6 +261,7 @@ void MainWindow::applyProfileFromIndex(int i)
     int bMouseInfo=mouseProfileToApply.a3;
     SystemParametersInfo(SPI_SETMOUSE,0,aMouseInfo,SPIF_SENDWININICHANGE);
     SystemParametersInfo(SPI_SETMOUSESPEED, 0, (int*) bMouseInfo, SPIF_SENDWININICHANGE);
+    this->lastUsedProfile = QString(this->mouseProfileAndAction[i].first.name);
 }
 
 void MainWindow::on_pushButtonApplyProfile_clicked()

@@ -17,19 +17,21 @@ SOURCES += main.cpp\
     dialogabout.cpp \
     dialogoption.cpp \
     dialogaddprofile.cpp \
-    mouseprofile.cpp
+    mouseprofile.cpp \
+    dialogmouseinformation.cpp
 
 HEADERS  += mainwindow.h \
     dialogabout.h \
     dialogoption.h \
     dialogaddprofile.h \
-    mouseprofile.h
+    mouseprofile.h \
+    dialogmouseinformation.h
 
 FORMS    += mainwindow.ui \
-    dialogMouseInformation.ui \
     dialogabout.ui \
     dialogoption.ui \
-    dialogaddprofile.ui
+    dialogaddprofile.ui \
+    dialogmouseinformation.ui
 
 RESOURCES += \
     Resource.qrc

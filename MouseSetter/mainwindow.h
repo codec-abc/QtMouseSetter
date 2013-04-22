@@ -30,8 +30,6 @@ public slots:
     void applyProfileFromIndex(int i);
     
 private slots:
-    void on_MouseInfoButton_clicked();
-  //  void on_pushButton_4_clicked();
     void trayIconClicked(QSystemTrayIcon::ActivationReason);
     void on_actionAbout_triggered();
     void on_actionPreferences_triggered();
@@ -61,12 +59,13 @@ private:
     QSettings* settings;
 
     Ui::MainWindow *ui;
-    QString string1;
 
     std::vector<std::pair<MouseProfile,QAction*> > mouseProfileAndAction;
 
     bool lastClose;
+
     QSignalMapper* signalMapper;
+    QString lastUsedProfile;
 
 };
 

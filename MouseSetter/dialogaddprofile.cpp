@@ -11,6 +11,7 @@ DialogAddProfile::DialogAddProfile(QWidget *parent) :
 {
     ui->setupUi(this);
     this->setFixedSize(this->geometry().width(),this->geometry().height());
+    this->ui->frame->setEnabled(true);
 }
 
 DialogAddProfile::~DialogAddProfile()
@@ -83,4 +84,14 @@ void DialogAddProfile::accept()
         msgBox.exec();
     }
 
+}
+
+void DialogAddProfile::on_radioButton_4_toggled(bool checked)
+{
+    this->ui->frame->setEnabled(checked);
+}
+
+void DialogAddProfile::on_radioButton_3_toggled(bool checked)
+{
+    this->ui->frame_5->setEnabled(checked);
 }

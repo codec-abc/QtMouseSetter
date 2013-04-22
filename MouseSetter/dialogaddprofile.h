@@ -21,6 +21,10 @@ public slots:
 private slots:
     void on_buttonBox_accepted();
 
+    void on_radioButton_4_toggled(bool checked);
+
+    void on_radioButton_3_toggled(bool checked);
+
 private:
     Ui::DialogAddProfile *ui;
 };

@@ -4,6 +4,7 @@
 #include <QSettings>
 #include "windows.h"
 #include <iostream>
+#include <QDir>
 
 DialogOption::DialogOption(QWidget *parent) :
     QDialog(parent),
@@ -24,7 +25,7 @@ void DialogOption::init()
     MainWindow* mainWindow = (MainWindow*) this->parent();
     QSettings* settings = mainWindow->getSetting();
     QString test = QSettings("HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run", QSettings::NativeFormat).value("MouseSetter").toString();
-    QString test2 = QCoreApplication::applicationFilePath();
+    QString test2 = QString("\"").append(QDir::toNativeSeparators( QCoreApplication::applicationFilePath())).append(QString("\""));
     bool value = test == test2;
     bool value2 = settings->value("showMainWindowAtStartup",true).toBool();
     bool value3 = settings->value("showTrayIconMessage",true).toBool();
@@ -64,7 +65,7 @@ void DialogOption::on_buttonBox_accepted()
     }
     if(value)
     {
-        QSettings("HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run", QSettings::NativeFormat).setValue("MouseSetter",QCoreApplication::applicationFilePath());
+        QSettings("HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run", QSettings::NativeFormat).setValue("MouseSetter",QString("\"").append(QDir::toNativeSeparators( QCoreApplication::applicationFilePath())).append(QString("\"")));
     }
     if(!value)
     {
